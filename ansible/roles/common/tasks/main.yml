@@ -1,0 +1,72 @@
+---
+# tasks file for common
+
+- name: Fix /etc/hosts for 127.0.0.1
+  ansible.builtin.lineinfile:
+    dest: /etc/hosts
+    regexp: '^127\.0\.0\.1.*'
+    line: "127.0.0.1 localhost {{ inventory_hostname_short }}"
+    state: present
+
+- name: Fix /etc/hosts for 127.0.1.1
+  ansible.builtin.lineinfile:
+    dest: /etc/hosts
+    regexp: '^127\.0\.1\.1.*'
+    line: "127.0.1.1 {{ inventory_hostname_short }}"
+    state: present
+
+- name: Disable cloud-init
+  ansible.builtin.file:
+    path: /etc/cloud/cloud-init.disabled
+    state: touch
+    mode: u+rw,g+rw,o-rwx
+
+- name: ubuntu
+  block:
+
+    - name: replace apt mirror on ubuntu
+      become: true
+      template:
+        src: templates/sources.list.ubuntu{{ ansible_distribution_version }}.j2
+        dest: /etc/apt/sources.list
+        backup: yes
+      register: replace_ubuntu_apt_config
+
+    - name: update apt cache on ubuntu
+      become: true
+      apt:
+        update_cache: yes
+      when: replace_ubuntu_apt_config.changed
+
+    - name: Update all packages to their latest version
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+
+    - name: Remove dependencies that are no longer required
+      ansible.builtin.apt:
+        autoremove: yes
+
+  when: ( ansible_distribution == "Ubuntu" and ( ansible_distribution_version == "20.04" or ansible_distribution_version == "22.04" ))
+
+- name: Read device information (always use unit when probing)
+  community.general.parted:
+    device: /dev/sda
+    unit: GiB
+  register: sda_info
+  tags:
+    - resize
+
+- name: Extend partition sda3
+  community.general.parted:
+    device: /dev/sda
+    label: gpt
+    number: 3 
+    part_end: "100%"
+    resize: true
+    state: present
+  notify: "Extend lvg"
+  when: sda_info.disk.size|int > (sda_info.partitions|last).end|int
+  tags:
+    - resize
+

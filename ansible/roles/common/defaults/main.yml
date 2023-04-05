@@ -1,0 +1,4 @@
+---
+# defaults file for common
+ubuntu_apt_mirror: 'mirror.yandex.ru'
+

@@ -1,0 +1,47 @@
+---
+# tasks file for worker
+
+- name: Create partition 1 for linstor
+  community.general.parted:
+    device: /dev/sdb
+    number: 1
+    flags: [ lvm ]
+    state: present
+    part_end: 50%
+  tags: 
+    - disk
+
+- name: Create partition 2 for linstor
+  community.general.parted:
+    device: /dev/sdb
+    number: 2
+    flags: [ lvm ]
+    state: present
+    part_start: 50%
+  tags: 
+    - disk
+
+- name: Create volume group for LVM thick
+  community.general.lvg:
+    vg: data_project
+    pvs: /dev/sdb1
+    vg_options: "--add-tag linstor-data"
+  tags:
+    - disk
+
+- name: Create volume group for LVMthin
+  community.general.lvg:
+    vg: data_project_thin
+    pvs: /dev/sdb2
+  tags:
+    - disk
+
+- name: Create logical volume for LVMthin
+  community.general.lvol:
+    vg: data_project_thin
+    thinpool: thindata
+    shrink: false
+    size: 100%FREE
+    opts: "--add-tag linstor-thindata"
+  tags:
+    - disk

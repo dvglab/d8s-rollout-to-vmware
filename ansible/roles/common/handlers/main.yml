@@ -1,0 +1,23 @@
+---
+# handlers file for common
+
+
+- name: Extend lvg
+  community.general.lvg:
+    vg: sysvg
+    pvs: /dev/sda3
+    pvresize: true
+  notify: "Extend lvol"
+  tags:
+    - resize
+
+- name: Extend lvol
+  community.general.lvol:
+    vg: sysvg
+    lv: root
+    size: 100%PVS
+    resizefs: true
+  tags:
+    - resize
+
+

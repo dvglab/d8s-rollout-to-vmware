@@ -1,0 +1,39 @@
+#jinja2: trim_blocks: False
+# This file is generated from information provided by the datasource.  Changes
+# to it will not persist across an instance reboot.  To disable cloud-init's
+# network configuration capabilities, write a file
+# /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg with the following:
+# network: {config: disabled}
+#
+network:
+    version: 2
+    ethernets:
+        ens192:
+            addresses:
+            - {{ ansible_ens192.ipv4.address }}/{{ ansible_ens192.ipv4.prefix }}
+            match:
+                macaddress: {{ ansible_ens192.macaddress }}
+            nameservers:
+                addresses:
+                {%- for dns_item in dns_servers %} 
+                - {{ dns_item }}
+                {%- endfor %}
+                search:
+                {%- for search_domain in dns_search %}
+                - {{ search_domain }}
+                {%- endfor %}
+            set-name: ens192
+            routes:
+            {%- for item in internal_routes %}
+            - to: {{ item }}
+              via: {{ internal_router }} 
+            {%- endfor %} 
+        ens224:
+            addresses:
+            - {{ ansible_ens224.ipv4.address }}/{{ ansible_ens224.ipv4.prefix }}
+            match:
+                macaddress: {{ ansible_ens224.macaddress }}
+            routes: 
+            - to: default
+              via: {{ default_router }} 
+            set-name: ens224

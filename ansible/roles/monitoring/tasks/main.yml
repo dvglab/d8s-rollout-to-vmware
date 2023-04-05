@@ -1,0 +1,19 @@
+---
+# tasks file for monitoring
+
+- name: Create partition for linstor
+  community.general.parted:
+    device: /dev/sdb
+    number: 1
+    flags: [ lvm ]
+    state: present
+  tags: 
+    - disk
+
+- name: task for creating volume group
+  community.general.lvg:
+    vg: d8_monitoring
+    pvs: /dev/sdb1
+    vg_options: "--add-tag linstor-monitoring"
+  tags:
+    - disk

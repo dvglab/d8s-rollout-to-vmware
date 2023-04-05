@@ -1,0 +1,13 @@
+---
+# tasks file for ingress
+
+- name: Set netplan config
+  ansible.builtin.template:
+    src: templates/50-cloud-init.j2
+    dest: /etc/netplan/50-cloud-init.yaml
+    backup: yes
+  notify: netplan generate config
+  tags:
+    - ingress
+
+

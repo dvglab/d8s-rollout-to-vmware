@@ -1,0 +1,11 @@
+default_router: 5.4.197.1
+internal_router: 10.5.1.30
+internal_routes:
+  - 10.0.0.0/8
+  - 192.168.0.0/16
+dns_servers:
+  - 10.5.1.30
+  - 10.5.2.30
+dns_search:
+  - domain.com
+  - domain-b.com

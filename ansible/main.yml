@@ -1,0 +1,42 @@
+---
+- hosts: "all"
+  become: true
+  tasks:
+  - import_role:
+      name: common
+    tags:
+    - common
+
+- hosts: "master"
+  become: true
+  tasks:
+  - import_role:
+      name: master
+    tags:
+    - master  
+
+- hosts: "ingress"
+  become: true
+  tasks:
+  - import_role:
+      name: ingress
+    tags:
+    - ingress
+
+- hosts: "monitoring"
+  become: true
+  tasks:
+  - import_role:
+      name: monitoring
+    tags:
+    - monitoring
+
+- hosts: "worker"
+  become: true
+  tasks:
+  - import_role:
+      name: worker
+    tags:
+    - worker
+
+
